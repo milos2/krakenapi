@@ -158,7 +158,7 @@ int main(int argc, char* argv[])
          throw runtime_error("wrong number of arguments");
       };
       
-      chrono::seconds dura(interval);
+      chrono::seconds durationInSeconds(interval);
 
       KClient kc;
       vector<KTrade> vt;
@@ -176,7 +176,7 @@ int main(int argc, char* argv[])
          }
 
          // sleep
-         this_thread::sleep_for(dura);
+         this_thread::sleep_for(durationInSeconds);
       }
 
       // terminate kraken lib's resources
