@@ -123,7 +123,20 @@ int main(int argc, char* argv[])
       //
       // usage:
       //     krt <pair> [interval] [since]
-      // 
+      //
+      //           <pair>   - asset pair to get data for (example: XBTUSD for Bitcoin to USD trades)
+      //           interval - 0 for one time query or interval (in seconds) to use to query repeatedly
+      //           since    - return trade data since given timestamp in Unix format
+      //
+      // example how to get initial Bitcoin/USD trades:
+      //     krt XBTUSD 0 0
+      //
+      // example how to get Bitcoint/USD trades since 1633550451:
+      //     krt XBTUSD 0 1633550451
+      //
+      // example how to get Bitcoint/USD trades since 1633550451 and continue querying on every 10sec for new trades:
+      //     krt XBTUSD 10 1633550451
+      //
 
       string pair;
       string last = "0"; // by default: the oldest possible trade data
@@ -131,32 +144,39 @@ int main(int argc, char* argv[])
 
       switch (argc) {
       case 4:
-	 last = string(argv[3]);
+         last = string(argv[3]);
       case 3:
-	 istringstream(argv[2]) >> interval;      
+         istringstream(argv[2]) >> interval;
       case 2:
-	 pair = string(argv[1]);
-	 break;
-      default: 
-	 throw runtime_error("wrong number of arguments");
+         pair = string(argv[1]);
+         break;
+      default:
+         cout << "usage: " << endl;
+         cout << "    krt <pair> [interval] [since]" << endl << endl;
+         cout << "example how to get Bitcoint/USD trades since 1633550451: " << endl;
+         cout << "   krt XBTUSD 0 1633550451" << endl << endl;
+         throw runtime_error("wrong number of arguments");
       };
       
-      chrono::seconds dura(interval);
+      chrono::seconds durationInSeconds(interval);
 
       KClient kc;
       vector<KTrade> vt;
 
       while (true) {
-	 // store and print trades
-	 last = kc.trades(pair, last, vt);
-	 for (int i = 0; i < vt.size(); ++i) 
-	    cout << vt[i] << endl;
-	    
-	 // exit from the loop if interval is 0
-	 if (interval == 0) break;
-	 
-	 // sleep
-	 this_thread::sleep_for(dura);
+         // store and print trades
+         last = kc.trades(pair, last, vt);
+         for (int i = 0; i < vt.size(); ++i) {
+            cout << vt[i] << endl;
+         }
+
+         // exit from the loop if interval is 0
+         if (interval == 0) {
+            break;
+         }
+
+         // sleep
+         this_thread::sleep_for(durationInSeconds);
       }
 
       // terminate kraken lib's resources
